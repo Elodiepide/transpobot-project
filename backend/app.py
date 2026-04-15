@@ -110,7 +110,7 @@ async def chat(msg: ChatMessage):
     try:
         llm_response = await ask_llm(msg.question)
         sql = llm_response.get("sql")
-        explication = llm_response.get("explication", "")
+        explication = llm_response.get("explication") or llm_response.get("explanation") or llm_response.get("answer") or "Voici les résultats."
 
         if not sql:
             return {"answer": explication, "data": [], "sql": None}
