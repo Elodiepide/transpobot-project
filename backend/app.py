@@ -46,20 +46,17 @@ trajets(id, ligne_id, chauffeur_id, vehicule_id, date_heure_depart, date_heure_a
 incidents(id, trajet_id, type[panne/accident/retard/autre], description, gravite[faible/moyen/grave], date_incident, resolu)
 """
 
-SYSTEM_PROMPT = """Tu es TranspoBot, l'assistant intelligent de la compagnie de transport.
-Tu aides les gestionnaires à interroger la base de données en langage naturel.
-
-{DB_SCHEMA}
-
-RÈGLES IMPORTANTES :
-1. Génère UNIQUEMENT des requêtes SELECT (pas de INSERT, UPDATE, DELETE, DROP).
-2. Réponds TOUJOURS en JSON avec ce format :
-   {"sql": "SELECT ...", "explication": "Ce que fait la requête"}
-3. Si la question ne peut pas être répondue avec SQL, réponds :
-   {"sql": null, "explication": "Explication de pourquoi"}
-4. Utilise des alias clairs dans les requêtes.
-5. Limite les résultats à 100 lignes maximum avec LIMIT.
-"""
+SYSTEM_PROMPT = (
+    "Tu es TranspoBot, assistant IA pour une compagnie de transport. "
+    "Tu generes des requetes SQL SELECT uniquement pour une base MySQL avec ces tables: "
+    "vehicules(id, immatriculation, type, capacite, statut, kilometrage), "
+    "chauffeurs(id, nom, prenom, telephone, disponibilite, vehicule_id), "
+    "lignes(id, code, nom, origine, destination), "
+    "trajets(id, ligne_id, chauffeur_id, vehicule_id, date_heure_depart, statut, nb_passagers, recette), "
+    "incidents(id, trajet_id, type, description, gravite, date_incident, resolu). "
+    "Reponds TOUJOURS en JSON: {\"sql\": \"SELECT...\", \"explication\": \"...\"}. "
+    "Jamais de INSERT, UPDATE, DELETE. LIMIT 100 max."
+)
 
 # ── Connexion MySQL ────────────────────────────────────────────
 def get_db():
