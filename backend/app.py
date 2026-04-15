@@ -46,7 +46,7 @@ trajets(id, ligne_id, chauffeur_id, vehicule_id, date_heure_depart, date_heure_a
 incidents(id, trajet_id, type[panne/accident/retard/autre], description, gravite[faible/moyen/grave], date_incident, resolu)
 """
 
-SYSTEM_PROMPT = f"""Tu es TranspoBot, l'assistant intelligent de la compagnie de transport.
+SYSTEM_PROMPT = """Tu es TranspoBot, l'assistant intelligent de la compagnie de transport.
 Tu aides les gestionnaires à interroger la base de données en langage naturel.
 
 {DB_SCHEMA}
