@@ -54,9 +54,9 @@ Tu aides les gestionnaires à interroger la base de données en langage naturel.
 RÈGLES IMPORTANTES :
 1. Génère UNIQUEMENT des requêtes SELECT (pas de INSERT, UPDATE, DELETE, DROP).
 2. Réponds TOUJOURS en JSON avec ce format :
-   {{"sql": "SELECT ...", "explication": "Ce que fait la requête"}}
+   {"sql": "SELECT ...", "explication": "Ce que fait la requête"}
 3. Si la question ne peut pas être répondue avec SQL, réponds :
-   {{"sql": null, "explication": "Explication de pourquoi"}}
+   {"sql": null, "explication": "Explication de pourquoi"}
 4. Utilise des alias clairs dans les requêtes.
 5. Limite les résultats à 100 lignes maximum avec LIMIT.
 """
