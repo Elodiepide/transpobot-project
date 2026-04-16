@@ -4,78 +4,223 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TranspoBot — Assistant IA Transport</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --rose: #e8547a;
+    --rose-light: #f9d0db;
+    --rose-dark: #c03060;
+    --yellow: #f5c842;
+    --yellow-light: #fef8e0;
+    --yellow-dark: #d4a800;
+    --white: #ffffff;
+    --off-white: #fdf8f9;
+    --gray: #6b7280;
+    --gray-light: #f3f4f6;
+    --dark: #1f1225;
+    --shadow: 0 4px 24px rgba(232,84,122,0.10);
+    --radius: 16px;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #1a202c; }
-  header { background: #1a56db; color: white; padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; }
-  header h1 { font-size: 1.4rem; }
-  header span { font-size: 2rem; }
-  .container { display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; padding: 1.5rem; max-width: 1400px; margin: 0 auto; }
-  .card { background: white; border-radius: 12px; padding: 1.2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 1rem; }
-  .stat { background: #eff6ff; border-radius: 8px; padding: 0.8rem; text-align: center; }
-  .stat .val { font-size: 1.8rem; font-weight: bold; color: #1a56db; }
-  .stat .lbl { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
-  /* Chat */
-  .chat-box { height: 400px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background: #f8fafc; }
-  .msg { margin-bottom: 0.8rem; }
-  .msg.user .bubble { background: #1a56db; color: white; margin-left: auto; }
-  .msg.bot .bubble { background: white; border: 1px solid #e2e8f0; }
-  .bubble { display: inline-block; padding: 0.6rem 1rem; border-radius: 12px; max-width: 85%; font-size: 0.9rem; line-height: 1.5; }
-  .msg.user { text-align: right; }
-  .chat-input { display: flex; gap: 0.5rem; }
-  .chat-input input { flex: 1; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.7rem 1rem; font-size: 0.95rem; outline: none; }
-  .chat-input input:focus { border-color: #1a56db; }
-  .chat-input button { background: #1a56db; color: white; border: none; border-radius: 8px; padding: 0.7rem 1.2rem; cursor: pointer; font-size: 0.95rem; }
-  .chat-input button:hover { background: #1e40af; }
-  .sql-preview { background: #1e293b; color: #94a3b8; font-family: monospace; font-size: 0.78rem; padding: 0.6rem; border-radius: 6px; margin-top: 0.4rem; white-space: pre-wrap; }
-  /* Suggestions */
-  .suggestions { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.8rem; }
-  .suggestions button { background: #eff6ff; color: #1a56db; border: 1px solid #bfdbfe; border-radius: 20px; padding: 0.3rem 0.8rem; font-size: 0.8rem; cursor: pointer; }
-  .suggestions button:hover { background: #dbeafe; }
-  /* Table résultats */
-  .results table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-  .results th { background: #1a56db; color: white; padding: 0.5rem; text-align: left; }
-  .results td { padding: 0.5rem; border-bottom: 1px solid #e2e8f0; }
-  .results tr:hover td { background: #f0f4f8; }
-  h2 { font-size: 1rem; color: #374151; margin-bottom: 0.8rem; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--off-white); color: var(--dark); min-height: 100vh; }
+  header {
+    background: linear-gradient(135deg, var(--rose-dark) 0%, var(--rose) 60%, #f0607f 100%);
+    color: white; padding: 1rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(192,48,96,0.3);
+  }
+  .header-left { display: flex; align-items: center; gap: 1rem; }
+  .header-logo { font-size: 2.2rem; }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 1.6rem; line-height: 1; }
+  .header-sub { font-size: 0.8rem; opacity: 0.85; margin-top: 2px; font-weight: 300; }
+  .header-badge { background: var(--yellow); color: var(--dark); padding: 0.3rem 1rem; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
+  nav {
+    background: var(--white); border-bottom: 2px solid var(--rose-light);
+    padding: 0 2rem; display: flex; gap: 0.2rem; overflow-x: auto;
+    box-shadow: 0 2px 8px rgba(232,84,122,0.06);
+  }
+  nav button {
+    padding: 1rem 1.4rem; border: none; background: none; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 500;
+    color: var(--gray); border-bottom: 3px solid transparent; margin-bottom: -2px;
+    white-space: nowrap; transition: all 0.2s; display: flex; align-items: center; gap: 0.4rem;
+  }
+  nav button:hover { color: var(--rose); }
+  nav button.active { color: var(--rose); border-bottom-color: var(--rose); font-weight: 600; }
+  .page { display: none; padding: 1.5rem 2rem; max-width: 1300px; margin: 0 auto; }
+  .page.active { display: block; }
+  .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+  .stat-card {
+    background: var(--white); border-radius: var(--radius); padding: 1.2rem 1rem;
+    text-align: center; box-shadow: var(--shadow); border-top: 4px solid var(--rose-light); transition: transform 0.2s;
+  }
+  .stat-card:hover { transform: translateY(-3px); }
+  .stat-card:nth-child(5) { border-top-color: var(--yellow); }
+  .stat-val { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--rose); font-weight: 700; }
+  .stat-card:nth-child(5) .stat-val { color: var(--yellow-dark); }
+  .stat-lbl { font-size: 0.75rem; color: var(--gray); margin-top: 4px; font-weight: 500; }
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+  .card { background: var(--white); border-radius: var(--radius); padding: 1.4rem; box-shadow: var(--shadow); }
+  .card-title { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--dark); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+  thead tr { background: linear-gradient(90deg, var(--rose), var(--rose-dark)); }
+  th { color: white; padding: 0.8rem 1rem; text-align: left; font-weight: 600; font-size: 0.82rem; }
+  td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--rose-light); }
+  tbody tr:hover td { background: var(--rose-light); transition: background 0.15s; }
+  tbody tr:last-child td { border-bottom: none; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
   .badge-green { background: #dcfce7; color: #166534; }
-  .badge-orange { background: #fff7ed; color: #9a3412; }
+  .badge-orange { background: var(--yellow-light); color: var(--yellow-dark); }
   .badge-red { background: #fee2e2; color: #991b1b; }
+  .badge-gray { background: var(--gray-light); color: var(--gray); }
+  .search-bar {
+    width: 100%; padding: 0.7rem 1rem 0.7rem 2.5rem;
+    border: 2px solid var(--rose-light); border-radius: 10px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; margin-bottom: 1rem; outline: none;
+    background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23e8547a' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 0.7rem center;
+  }
+  .search-bar:focus { border-color: var(--rose); }
+  .chat-box {
+    height: 420px; overflow-y: auto; border: 2px solid var(--rose-light);
+    border-radius: var(--radius); padding: 1.2rem; background: var(--off-white); scroll-behavior: smooth;
+  }
+  .msg { margin-bottom: 1rem; display: flex; flex-direction: column; }
+  .msg.user { align-items: flex-end; }
+  .msg.bot { align-items: flex-start; }
+  .msg-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; margin-bottom: 4px; }
+  .msg.bot .msg-avatar { background: var(--rose); color: white; }
+  .msg.user .msg-avatar { background: var(--yellow); color: var(--dark); }
+  .bubble { padding: 0.7rem 1.1rem; border-radius: 14px; max-width: 80%; font-size: 0.9rem; line-height: 1.6; }
+  .msg.user .bubble { background: var(--rose); color: white; border-bottom-right-radius: 4px; }
+  .msg.bot .bubble { background: var(--white); border: 1px solid var(--rose-light); border-bottom-left-radius: 4px; }
+  .sql-block { background: var(--dark); color: #f9d0db; font-family: monospace; font-size: 0.78rem; padding: 0.7rem 1rem; border-radius: 8px; margin-top: 0.5rem; white-space: pre-wrap; word-break: break-all; }
+  .suggestions { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.8rem; }
+  .suggestions button { background: var(--yellow-light); color: var(--yellow-dark); border: 1.5px solid var(--yellow); border-radius: 20px; padding: 0.35rem 0.9rem; font-size: 0.8rem; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 500; transition: all 0.2s; }
+  .suggestions button:hover { background: var(--yellow); color: var(--dark); }
+  .chat-input { display: flex; gap: 0.6rem; margin-top: 0.8rem; }
+  .chat-input input { flex: 1; border: 2px solid var(--rose-light); border-radius: 10px; padding: 0.75rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; outline: none; }
+  .chat-input input:focus { border-color: var(--rose); }
+  .btn-rose { background: linear-gradient(135deg, var(--rose), var(--rose-dark)); color: white; border: none; border-radius: 10px; padding: 0.75rem 1.4rem; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600; white-space: nowrap; }
+  .btn-rose:hover { opacity: 0.9; }
+  .results-section { margin-top: 1rem; background: var(--white); border-radius: var(--radius); padding: 1.2rem; box-shadow: var(--shadow); display: none; }
+  .results-title { font-family: 'Playfair Display', serif; color: var(--rose); margin-bottom: 0.8rem; font-size: 1rem; }
+  .donut-wrap { display: flex; align-items: center; gap: 1.5rem; }
+  .donut-legend { flex: 1; }
+  .legend-item { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.85rem; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .bar-chart { display: flex; align-items: flex-end; gap: 0.6rem; height: 120px; padding-top: 0.5rem; }
+  .bar-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
+  .bar { width: 100%; border-radius: 6px 6px 0 0; background: linear-gradient(180deg, var(--rose), var(--rose-dark)); min-height: 4px; }
+  .bar-label { font-size: 0.65rem; color: var(--gray); text-align: center; line-height: 1.2; }
+  .bar-val { font-size: 0.7rem; font-weight: 600; color: var(--rose-dark); }
+  @media (max-width: 768px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .charts-row { grid-template-columns: 1fr; }
+    .page { padding: 1rem; }
+  }
 </style>
 </head>
 <body>
+
 <header>
-  <span>🚌</span>
-  <div>
-    <h1>TranspoBot</h1>
-    <small>Assistant IA — Gestion de Transport</small>
+  <div class="header-left">
+    <div class="header-logo">🚌</div>
+    <div>
+      <div class="header-title">TranspoBot</div>
+      <div class="header-sub">Assistant intelligent de gestion de transport — GLSi L3</div>
+    </div>
   </div>
+  <div class="header-badge">✨ IA Activée</div>
 </header>
 
-<div class="container">
-  <!-- Colonne gauche -->
-  <div>
-    <div class="card" style="margin-bottom:1rem">
-      <h2>📊 Tableau de bord</h2>
-      <div class="stats-grid" id="stats">
-        <div class="stat"><div class="val">—</div><div class="lbl">Trajets terminés</div></div>
-        <div class="stat"><div class="val">—</div><div class="lbl">En cours</div></div>
-        <div class="stat"><div class="val">—</div><div class="lbl">Véhicules actifs</div></div>
-        <div class="stat"><div class="val">—</div><div class="lbl">Incidents ouverts</div></div>
+<nav>
+  <button class="active" onclick="showPage('dashboard', this)">📊 Dashboard</button>
+  <button onclick="showPage('vehicules', this)">🚌 Véhicules</button>
+  <button onclick="showPage('chauffeurs', this)">👤 Chauffeurs</button>
+  <button onclick="showPage('trajets', this)">📍 Trajets</button>
+  <button onclick="showPage('incidents', this)">⚠️ Incidents</button>
+  <button onclick="showPage('lignes', this)">📋 Lignes</button>
+  <button onclick="showPage('chat', this)">💬 Assistant IA</button>
+</nav>
+
+<!-- DASHBOARD -->
+<div id="page-dashboard" class="page active">
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-val" id="s-trajets">—</div><div class="stat-lbl">Trajets terminés</div></div>
+    <div class="stat-card"><div class="stat-val" id="s-cours">—</div><div class="stat-lbl">Trajets en cours</div></div>
+    <div class="stat-card"><div class="stat-val" id="s-vehicules">—</div><div class="stat-lbl">Véhicules actifs</div></div>
+    <div class="stat-card"><div class="stat-val" id="s-incidents">—</div><div class="stat-lbl">Incidents ouverts</div></div>
+    <div class="stat-card"><div class="stat-val" id="s-recette">—</div><div class="stat-lbl">Recette totale (FCFA)</div></div>
+  </div>
+  <div class="charts-row">
+    <div class="card">
+      <div class="card-title"><span>🚌</span> Véhicules par statut</div>
+      <div class="donut-wrap">
+        <svg width="120" height="120" viewBox="0 0 120 120" id="donut-svg">
+          <circle cx="60" cy="60" r="45" fill="none" stroke="#f3f4f6" stroke-width="20"/>
+        </svg>
+        <div class="donut-legend" id="donut-legend">Chargement...</div>
       </div>
     </div>
-
     <div class="card">
-      <h2>🕒 Trajets récents</h2>
-      <div class="results" id="trajets-table"><p style="color:#94a3b8;font-size:0.85rem">Chargement...</p></div>
+      <div class="card-title"><span>💰</span> Recettes par ligne (FCFA)</div>
+      <div class="bar-chart" id="bar-chart"><div style="color:var(--gray);font-size:0.85rem">Chargement...</div></div>
     </div>
   </div>
-
-  <!-- Colonne droite : Chat -->
   <div class="card">
-    <h2>💬 Assistant TranspoBot</h2>
+    <div class="card-title"><span>🕒</span> Trajets récents</div>
+    <div class="table-wrap" id="trajets-recent">Chargement...</div>
+  </div>
+</div>
+
+<!-- VEHICULES -->
+<div id="page-vehicules" class="page">
+  <div class="card">
+    <div class="card-title"><span>🚌</span> Liste des véhicules</div>
+    <input type="text" class="search-bar" placeholder="Rechercher par immatriculation, type, statut..." oninput="filterTable('tbl-vehicules', this.value)">
+    <div class="table-wrap" id="tbl-vehicules">Chargement...</div>
+  </div>
+</div>
+
+<!-- CHAUFFEURS -->
+<div id="page-chauffeurs" class="page">
+  <div class="card">
+    <div class="card-title"><span>👤</span> Liste des chauffeurs</div>
+    <input type="text" class="search-bar" placeholder="Rechercher par nom, prénom, téléphone..." oninput="filterTable('tbl-chauffeurs', this.value)">
+    <div class="table-wrap" id="tbl-chauffeurs">Chargement...</div>
+  </div>
+</div>
+
+<!-- TRAJETS -->
+<div id="page-trajets" class="page">
+  <div class="card">
+    <div class="card-title"><span>📍</span> Trajets récents</div>
+    <input type="text" class="search-bar" placeholder="Rechercher..." oninput="filterTable('tbl-trajets', this.value)">
+    <div class="table-wrap" id="tbl-trajets">Chargement...</div>
+  </div>
+</div>
+
+<!-- INCIDENTS -->
+<div id="page-incidents" class="page">
+  <div class="card">
+    <div class="card-title"><span>⚠️</span> Incidents signalés</div>
+    <div class="table-wrap" id="tbl-incidents">Chargement...</div>
+  </div>
+</div>
+
+<!-- LIGNES -->
+<div id="page-lignes" class="page">
+  <div class="card">
+    <div class="card-title"><span>📋</span> Lignes de transport</div>
+    <div class="table-wrap" id="tbl-lignes">Chargement...</div>
+  </div>
+</div>
+
+<!-- CHAT -->
+<div id="page-chat" class="page">
+  <div class="card">
+    <div class="card-title"><span>💬</span> Assistant TranspoBot IA</div>
     <div class="suggestions">
       <button onclick="ask('Combien de trajets ont été effectués cette semaine ?')">Trajets cette semaine</button>
       <button onclick="ask('Quel chauffeur a le plus de trajets ?')">Meilleur chauffeur</button>
@@ -83,65 +228,190 @@
       <button onclick="ask('Liste les incidents graves non résolus')">Incidents graves</button>
       <button onclick="ask('Quelle est la recette totale du mois de mars 2026 ?')">Recette mars 2026</button>
     </div>
-
     <div class="chat-box" id="chat-box">
       <div class="msg bot">
-        <div class="bubble">👋 Bonjour ! Je suis TranspoBot, votre assistant intelligent.<br>Posez-moi n'importe quelle question sur votre flotte, vos trajets ou vos chauffeurs !</div>
+        <div class="msg-avatar">🤖</div>
+        <div class="bubble">👋 Bonjour ! Je suis TranspoBot, votre assistant IA.<br>Posez-moi n'importe quelle question sur votre flotte, vos trajets ou vos chauffeurs !</div>
       </div>
     </div>
-
     <div class="chat-input">
       <input type="text" id="user-input" placeholder="Ex: Combien de trajets ce mois-ci ?" onkeypress="if(event.key==='Enter') sendMessage()">
-      <button onclick="sendMessage()">Envoyer ➤</button>
+      <button class="btn-rose" onclick="sendMessage()">Envoyer ➤</button>
     </div>
-
-    <div id="results-section" style="margin-top:1rem; display:none">
-      <h2>📋 Résultats</h2>
-      <div class="results" id="results-table"></div>
-    </div>
+  </div>
+  <div class="results-section" id="results-section">
+    <div class="results-title">📋 Résultats de la requête</div>
+    <div class="table-wrap" id="results-table"></div>
   </div>
 </div>
 
 <script>
-const API = 'https://transpobot-project.onrender.com';  // Remplacer par l'URL de votre backend
+const API = 'https://transpobot-project.onrender.com';
+
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+function badge(val, map) {
+  for (const [k, cls] of Object.entries(map)) {
+    if (String(val) === k) return `<span class="badge ${cls}">${val}</span>`;
+  }
+  return `<span class="badge badge-gray">${val ?? ''}</span>`;
+}
+
+function buildTable(data, colMap) {
+  if (!data || !data.length) return '<p style="color:var(--gray);padding:1rem">Aucune donnée.</p>';
+  const headers = Object.keys(colMap);
+  const ths = headers.map(h => `<th>${h}</th>`).join('');
+  const trs = data.map(row => `<tr>${Object.values(colMap).map(fn => `<td>${fn(row)}</td>`).join('')}</tr>`).join('');
+  return `<table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`;
+}
+
+function filterTable(id, q) {
+  document.getElementById(id).querySelectorAll('tbody tr').forEach(tr => {
+    tr.style.display = tr.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+  });
+}
 
 async function loadStats() {
   try {
-    const r = await fetch(`${API}/api/stats`);
-    const d = await r.json();
-    const grid = document.getElementById('stats');
-    const vals = [d.total_trajets, d.trajets_en_cours, d.vehicules_actifs, d.incidents_ouverts];
-    grid.querySelectorAll('.val').forEach((el, i) => el.textContent = vals[i] ?? '—');
-  } catch(e) { console.warn('Stats non disponibles'); }
+    const d = await fetch(`${API}/api/stats`).then(r => r.json());
+    document.getElementById('s-trajets').textContent = d.total_trajets ?? '—';
+    document.getElementById('s-cours').textContent = d.trajets_en_cours ?? '—';
+    document.getElementById('s-vehicules').textContent = d.vehicules_actifs ?? '—';
+    document.getElementById('s-incidents').textContent = d.incidents_ouverts ?? '—';
+    document.getElementById('s-recette').textContent = d.recette_totale ? Number(d.recette_totale).toLocaleString('fr') : '—';
+  } catch(e) {}
+}
+
+async function loadVehicules() {
+  try {
+    const data = await fetch(`${API}/api/vehicules`).then(r => r.json());
+    const statutVeh = { 'actif': 'badge-green', 'maintenance': 'badge-orange', 'hors_service': 'badge-red' };
+    const html = buildTable(data, {
+      'Immatriculation': r => `<strong>${r.immatriculation}</strong>`,
+      'Type': r => r.type,
+      'Capacité': r => r.capacite,
+      'Statut': r => badge(r.statut, statutVeh),
+      'Kilométrage': r => Number(r.kilometrage).toLocaleString('fr') + ' km',
+      'Acquisition': r => r.date_acquisition ? String(r.date_acquisition).split('T')[0] : ''
+    });
+    document.getElementById('tbl-vehicules').innerHTML = html;
+    const counts = {};
+    data.forEach(v => counts[v.statut] = (counts[v.statut] || 0) + 1);
+    drawDonut(counts);
+  } catch(e) {}
+}
+
+async function loadChauffeurs() {
+  try {
+    const data = await fetch(`${API}/api/chauffeurs`).then(r => r.json());
+    const html = buildTable(data, {
+      'Nom': r => `<strong>${r.nom}</strong>`,
+      'Prénom': r => r.prenom,
+      'Téléphone': r => r.telephone,
+      'Permis': r => r.categorie_permis,
+      'Disponibilité': r => badge(r.disponibilite ? 'disponible' : 'indisponible', { 'disponible': 'badge-green', 'indisponible': 'badge-red' }),
+      'Véhicule': r => r.immatriculation || '—',
+      'Embauche': r => r.date_embauche ? String(r.date_embauche).split('T')[0] : ''
+    });
+    document.getElementById('tbl-chauffeurs').innerHTML = html;
+  } catch(e) {}
 }
 
 async function loadTrajets() {
   try {
-    const r = await fetch(`${API}/api/trajets/recent`);
-    const data = await r.json();
-    const container = document.getElementById('trajets-table');
-    if (!data.length) { container.innerHTML = '<p style="color:#94a3b8">Aucun trajet</p>'; return; }
-    const rows = data.slice(0, 8).map(t => `
-      <tr>
-        <td>${t.ligne}</td>
-        <td>${t.chauffeur_nom}</td>
-        <td>${new Date(t.date_heure_depart).toLocaleDateString('fr')}</td>
-        <td><span class="badge ${t.statut==='termine'?'badge-green':t.statut==='en_cours'?'badge-orange':'badge-red'}">${t.statut}</span></td>
-      </tr>`).join('');
-    container.innerHTML = `<table><thead><tr><th>Ligne</th><th>Chauffeur</th><th>Date</th><th>Statut</th></tr></thead><tbody>${rows}</tbody></table>`;
-  } catch(e) { console.warn('Trajets non disponibles'); }
+    const data = await fetch(`${API}/api/trajets/recent`).then(r => r.json());
+    const statutTrajet = { 'termine': 'badge-green', 'en_cours': 'badge-orange', 'planifie': 'badge-gray', 'annule': 'badge-red' };
+    const html = buildTable(data, {
+      'Ligne': r => r.ligne,
+      'Chauffeur': r => r.chauffeur_nom,
+      'Véhicule': r => r.immatriculation,
+      'Départ': r => r.date_heure_depart ? new Date(r.date_heure_depart).toLocaleDateString('fr') : '',
+      'Passagers': r => r.nb_passagers ?? '—',
+      'Recette': r => r.recette ? Number(r.recette).toLocaleString('fr') + ' F' : '—',
+      'Statut': r => badge(r.statut, statutTrajet)
+    });
+    document.getElementById('tbl-trajets').innerHTML = html;
+    document.getElementById('trajets-recent').innerHTML = html;
+    const recettes = {};
+    data.forEach(t => { if (t.ligne && t.recette) recettes[t.ligne] = (recettes[t.ligne] || 0) + Number(t.recette); });
+    drawBarChart(recettes);
+  } catch(e) {}
+}
+
+async function loadFromChat(question, targetId, extraRender) {
+  try {
+    const resp = await fetch(`${API}/api/chat`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({question})
+    }).then(r => r.json());
+    if (resp.data && resp.data.length) {
+      const keys = Object.keys(resp.data[0]);
+      const ths = keys.map(k => `<th>${k}</th>`).join('');
+      const trs = resp.data.map(row => {
+        const tds = keys.map(k => {
+          if (extraRender) return `<td>${extraRender(k, row[k])}</td>`;
+          return `<td>${row[k] ?? ''}</td>`;
+        }).join('');
+        return `<tr>${tds}</tr>`;
+      }).join('');
+      document.getElementById(targetId).innerHTML = `<table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`;
+    }
+  } catch(e) {}
+}
+
+function drawDonut(counts) {
+  const colors = { actif: '#e8547a', maintenance: '#f5c842', hors_service: '#d1d5db' };
+  const labels = { actif: 'Actif', maintenance: 'Maintenance', hors_service: 'Hors service' };
+  const total = Object.values(counts).reduce((a, b) => a + b, 0);
+  if (!total) return;
+  const svg = document.getElementById('donut-svg');
+  let angle = -90; let paths = ''; const legend = [];
+  Object.entries(counts).forEach(([k, v]) => {
+    const pct = v / total;
+    const a1 = angle * Math.PI / 180;
+    angle += pct * 360;
+    const a2 = angle * Math.PI / 180;
+    const x1 = 60 + 45 * Math.cos(a1), y1 = 60 + 45 * Math.sin(a1);
+    const x2 = 60 + 45 * Math.cos(a2), y2 = 60 + 45 * Math.sin(a2);
+    const large = pct > 0.5 ? 1 : 0;
+    const color = colors[k] || '#94a3b8';
+    paths += `<path d="M60,60 L${x1},${y1} A45,45 0 ${large},1 ${x2},${y2} Z" fill="${color}" opacity="0.9"/>`;
+    legend.push(`<div class="legend-item"><div class="legend-dot" style="background:${color}"></div><span>${labels[k]||k}: <strong>${v}</strong></span></div>`);
+  });
+  paths += `<circle cx="60" cy="60" r="28" fill="white"/>`;
+  svg.innerHTML = paths;
+  document.getElementById('donut-legend').innerHTML = legend.join('');
+}
+
+function drawBarChart(recettes) {
+  const el = document.getElementById('bar-chart');
+  const entries = Object.entries(recettes).slice(0, 6);
+  if (!entries.length) { el.innerHTML = '<p style="color:var(--gray)">Pas de données</p>'; return; }
+  const max = Math.max(...entries.map(e => e[1]));
+  el.innerHTML = entries.map(([ligne, val]) => {
+    const h = Math.max(8, (val / max) * 100);
+    const shortName = ligne.replace('Ligne ', '').substring(0, 12);
+    return `<div class="bar-item"><div class="bar-val">${Math.round(val/1000)}k</div><div class="bar" style="height:${h}px"></div><div class="bar-label">${shortName}</div></div>`;
+  }).join('');
 }
 
 function ask(q) {
   document.getElementById('user-input').value = q;
+  showPage('chat', document.querySelectorAll('nav button')[6]);
   sendMessage();
 }
 
-function addMessage(role, text, sql = null) {
+function addMsg(role, text, sql) {
   const box = document.getElementById('chat-box');
   const div = document.createElement('div');
   div.className = `msg ${role}`;
-  div.innerHTML = `<div class="bubble">${text}${sql ? `<div class="sql-preview">${sql}</div>` : ''}</div>`;
+  const avatar = role === 'bot' ? '🤖' : '👤';
+  div.innerHTML = `<div class="msg-avatar">${avatar}</div><div class="bubble">${text}${sql ? `<div class="sql-block">${sql}</div>` : ''}</div>`;
   box.appendChild(div);
   box.scrollTop = box.scrollHeight;
 }
@@ -151,34 +421,37 @@ async function sendMessage() {
   const question = input.value.trim();
   if (!question) return;
   input.value = '';
-  addMessage('user', question);
-  addMessage('bot', '⏳ Analyse en cours...');
-
+  addMsg('user', question);
+  addMsg('bot', '⏳ Analyse en cours...');
   try {
     const r = await fetch(`${API}/api/chat`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      method: 'POST', headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ question })
     });
     const data = await r.json();
-    document.querySelector('.msg.bot:last-child').remove();
-    addMessage('bot', data.answer + (data.count !== undefined ? ` (${data.count} résultat${data.count > 1 ? 's' : ''})` : ''), data.sql);
-
+    document.querySelector('#chat-box .msg.bot:last-child').remove();
+    const countTxt = data.count !== undefined ? ` <em style="color:var(--gray);font-size:0.8rem">(${data.count} résultat${data.count>1?'s':''})</em>` : '';
+    addMsg('bot', (data.answer || 'Voici les résultats.') + countTxt, data.sql);
     if (data.data && data.data.length > 0) {
-      const section = document.getElementById('results-section');
-      section.style.display = 'block';
+      const sec = document.getElementById('results-section');
+      sec.style.display = 'block';
       const keys = Object.keys(data.data[0]);
-      const rows = data.data.map(row => `<tr>${keys.map(k => `<td>${row[k] ?? ''}</td>`).join('')}</tr>`).join('');
-      document.getElementById('results-table').innerHTML = `<table><thead><tr>${keys.map(k=>`<th>${k}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`;
+      const ths = keys.map(k => `<th>${k}</th>`).join('');
+      const trs = data.data.map(row => `<tr>${keys.map(k => `<td>${row[k]??''}</td>`).join('')}</tr>`).join('');
+      document.getElementById('results-table').innerHTML = `<table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`;
     }
   } catch(e) {
-    document.querySelector('.msg.bot:last-child').remove();
-    addMessage('bot', '❌ Erreur de connexion au serveur.');
+    document.querySelector('#chat-box .msg.bot:last-child').remove();
+    addMsg('bot', '❌ Erreur de connexion au serveur.');
   }
 }
 
 loadStats();
+loadVehicules();
+loadChauffeurs();
 loadTrajets();
+loadFromChat('liste tous les incidents avec leur type gravite date et statut resolu', 'tbl-incidents');
+loadFromChat('liste toutes les lignes avec code nom origine destination distance_km et duree_minutes', 'tbl-lignes');
 </script>
 </body>
 </html>
